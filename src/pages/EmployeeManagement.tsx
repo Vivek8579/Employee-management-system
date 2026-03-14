@@ -56,5 +56,65 @@ const AdminManagement: React.FC = () => {
     };
   }, []);
 
+   const fetchAdmins = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('admins')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      
+      // Use the type casting utility
+      const typedAdmins = castToAdminProfiles(data || []);
+      setAdmins(typedAdmins);
+    } catch (error) {
+      console.error('Error fetching admins:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch admin data",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCreateAdmin = async () => {
+    try {
+      if (!formData.name || !formData.email || !formData.password) {
+        toast({ title: "Error", description: "Please fill in all required fields", variant: "destructive" });
+        return;
+      }
+      if (formData.password.length < 6) {
+        toast({ title: "Error", description: "Password must be at least 6 characters", variant: "destructive" });
+        return;
+      }
+
+      // Use edge function to create admin without switching session
+      const { data, error } = await supabase.functions.invoke('admin-management', {
+        body: {
+          action: 'create_admin',
+          email: formData.email,
+          password: formData.password,
+          name: formData.name,
+          role: formData.role,
+          avatar: formData.avatar || null
+        }
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      toast({ title: "Success", description: "Admin created successfully. They can now login with their credentials." });
+      setDialogOpen(false);
+      resetForm();
+      fetchAdmins();
+    } catch (error: any) {
+      console.error('Error creating admin:', error);
+      toast({ title: "Error", description: error.message || "Failed to create admin", variant: "destructive" });
+    }
+  };
+
 
 export default EmployeeManagement;
