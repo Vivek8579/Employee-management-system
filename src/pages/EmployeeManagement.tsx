@@ -116,5 +116,66 @@ const AdminManagement: React.FC = () => {
     }
   };
 
+   const handleUpdateAdmin = async () => {
+    if (!selectedAdmin) return;
+
+    try {
+      // Upload new avatar if file selected
+      let avatarUrl = formData.avatar;
+      if (formData.avatarFile && selectedAdmin.user_id) {
+        const fileExt = formData.avatarFile.name.split('.').pop();
+        const fileName = `avatars/${selectedAdmin.user_id}.${fileExt}`;
+        const { error: uploadError } = await supabase.storage
+          .from('uploads')
+          .upload(fileName, formData.avatarFile, { upsert: true });
+        
+        if (!uploadError) {
+          const { data: urlData } = supabase.storage.from('uploads').getPublicUrl(fileName);
+          avatarUrl = urlData.publicUrl;
+        }
+      }
+
+      const { error } = await supabase
+        .from('admins')
+        .update({
+          name: formData.name,
+          email: formData.email,
+          otp_email: formData.otp_email || null,
+          role: formData.role,
+          avatar: avatarUrl || null
+        })
+        .eq('id', selectedAdmin.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Admin updated successfully"
+      });
+
+      setDialogOpen(false);
+      setSelectedAdmin(null);
+      resetForm();
+      fetchAdmins();
+    } catch (error: any) {
+      console.error('Error updating admin:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update admin",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleUpdatePassword = async () => {
+    if (!selectedAdmin || !newPassword) {
+      toast({ title: "Error", description: "Please enter a new password", variant: "destructive" });
+      return;
+    }
+    if (newPassword.length < 6) {
+      toast({ title: "Error", description: "Password must be at least 6 characters", variant: "destructive" });
+      return;
+    }
+
 
 export default EmployeeManagement;
