@@ -177,6 +177,32 @@ const AdminManagement: React.FC = () => {
       return;
     }
  
-    
+        if (!selectedAdmin.user_id) {
+      toast({ title: "Error", description: "This admin has no linked auth user", variant: "destructive" });
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-management', {
+        body: { action: 'set_password', userId: selectedAdmin.user_id, newPassword }
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      toast({ title: "Success", description: "Password updated successfully" });
+      setPasswordDialogOpen(false);
+      setNewPassword('');
+      setSelectedAdmin(null);
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message || "Failed to update password", variant: "destructive" });
+    }
+  };
+
+  const openPasswordDialog = (admin: AdminProfile) => {
+    setSelectedAdmin(admin);
+    setNewPassword('');
+    setPasswordDialogOpen(true);
+  };
 
 export default EmployeeManagement;
