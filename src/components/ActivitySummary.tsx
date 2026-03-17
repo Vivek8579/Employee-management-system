@@ -1,23 +1,3 @@
-import { useState, useEffect, useRef } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { 
-  Download, Activity, Clock, FileText, User, Bell, Upload, 
-  CheckCircle, LogIn, Calendar as CalendarIcon, Shield, Award, Database,
-  BarChart3, TrendingUp, Volume2
-} from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
-import { format, subDays, startOfDay, endOfDay } from 'date-fns';
-import { cn } from '@/lib/utils';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { useNotificationSound } from '@/hooks/useNotificationSound';
-import { toast } from '@/hooks/use-toast';
 
 interface ActivityLog {
   id: string;
