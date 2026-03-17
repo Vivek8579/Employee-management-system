@@ -284,6 +284,13 @@ const AdminManagement: React.FC = () => {
   };
 
 
+  const openCreateDialog = () => {
+    resetForm();
+    setSelectedAdmin(null);
+    setDialogOpen(true);
+  };
+
+
   
 
 
