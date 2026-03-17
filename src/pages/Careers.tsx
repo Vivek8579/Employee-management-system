@@ -148,4 +148,50 @@ const Careers: React.FC = () => {
           ))}
         </div>
       </section>
+            {/* FORM */}
+      <section ref={formRef} className="py-20">
+        <form onSubmit={handleSubmit} className="space-y-6">
+
+          <Input
+            value={formData.fullName}
+            onChange={(e) => handleInputChange('fullName', e.target.value)}
+            placeholder="Full Name"
+          />
+
+          <Input
+            value={formData.email}
+            onChange={(e) => handleInputChange('email', e.target.value)}
+            placeholder="Email"
+          />
+
+          <Select onValueChange={(v) => handleInputChange('roleAppliedFor', v)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Role" />
+            </SelectTrigger>
+            <SelectContent>
+              {roles.map(role => (
+                <SelectItem key={role} value={role}>{role}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* FILE UPLOAD */}
+          <input type="file" onChange={(e) => setResumeFile(e.target.files?.[0] || null)} />
+
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? <Loader2 className="animate-spin" /> : 'Apply'}
+          </Button>
+
+        </form>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="py-10 text-center text-muted-foreground">
+        © {new Date().getFullYear()} THRYLOS
+      </footer>
+    </div>
+  );
+};
+
+export default Careers;
   
