@@ -1,31 +1,4 @@
 
-      return () => {
-        supabase.removeChannel(channel);
-      };
-    }
-  }, [adminProfile, selectedAdmin, selectedDate, soundEnabled]);
-
-  const fetchAdmins = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('admins')
-        .select('id, name, role')
-        .eq('is_active', true);
-
-      if (error) throw error;
-      setAdmins((data || []) as Admin[]);
-    } catch (error) {
-      console.error('Error fetching admins:', error);
-    }
-  };
-
-  const fetchChartData = async () => {
-    try {
-      // Fetch last 7 days of activity for charts
-      const last7Days = subDays(new Date(), 7);
-      
-      const { data, error } = await supabase
-        .from('admin_activity_logs')
         .select('*')
         .gte('created_at', last7Days.toISOString())
         .order('created_at', { ascending: false });
