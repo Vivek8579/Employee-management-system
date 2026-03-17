@@ -37,3 +37,37 @@ const handleFiles = async (files: FileList) => {
     setUploading(false);
   }
 };
+const processCsvData = async (dataLines: string[], headers: string[]): Promise<UploadResult> => {
+  const result: UploadResult = { success: 0, errors: [], total: dataLines.length };
+
+  const isEsports = headers.includes('player_name') || headers.includes('tournament_name');
+  const isSocial = headers.includes('service_type') || headers.includes('post_account_link');
+
+  for (let i = 0; i < dataLines.length; i++) {
+    try {
+      const values = dataLines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+      const record: any = {};
+
+      headers.forEach((header, index) => {
+        record[header] = values[index] || '';
+      });
+
+      if (isEsports) {
+        await supabase.from('esports_players').insert({
+          player_name: record.player_name,
+          tournament_name: record.tournament_name
+        } as any);
+      } else if (isSocial) {
+        await supabase.from('social_media_orders').insert({
+          service_type: record.service_type
+        } as any);
+      }
+
+      result.success++;
+    } catch (error) {
+      result.errors.push(`Row ${i + 1} failed`);
+    }
+  }
+
+  return result;
+};
