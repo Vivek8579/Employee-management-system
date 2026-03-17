@@ -1,28 +1,4 @@
 
-      }
-
-      // Real-time subscription for activity updates
-      const channel = supabase
-        .channel('activity-changes')
-        .on('postgres_changes', 
-          { event: 'INSERT', schema: 'public', table: 'admin_activity_logs' },
-          (payload) => {
-            fetchActivities();
-            if (isSuperAdmin) fetchChartData();
-            
-            // Play sound for new activities (not from self)
-            const newActivity = payload.new as any;
-            if (newActivity.admin_id !== adminProfile.id && soundEnabled) {
-              playSound();
-              toast({
-                title: "New Activity",
-                description: `${newActivity.action}`,
-              });
-            }
-          }
-        )
-        .subscribe();
-
       return () => {
         supabase.removeChannel(channel);
       };
