@@ -1,30 +1,4 @@
 
-}
-
-const CHART_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
-
-const ActivitySummary = () => {
-  const { adminProfile } = useAuth();
-  const { playSound } = useNotificationSound();
-  const [activities, setActivities] = useState<ActivityLog[]>([]);
-  const [admins, setAdmins] = useState<Admin[]>([]);
-  const [selectedAdmin, setSelectedAdmin] = useState<string>('self');
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [isLoading, setIsLoading] = useState(true);
-  const [showCharts, setShowCharts] = useState(false);
-  const [dailyData, setDailyData] = useState<DailyActivity[]>([]);
-  const [actionBreakdown, setActionBreakdown] = useState<ActionBreakdown[]>([]);
-  const [soundEnabled, setSoundEnabled] = useState(true);
-  const lastActivityCount = useRef(0);
-
-  const isSuperAdmin = adminProfile?.role === 'super_admin';
-
-  useEffect(() => {
-    if (adminProfile) {
-      fetchActivities();
-      if (isSuperAdmin) {
-        fetchAdmins();
-        fetchChartData();
       }
 
       // Real-time subscription for activity updates
