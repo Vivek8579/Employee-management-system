@@ -259,6 +259,17 @@ const AdminManagement: React.FC = () => {
     }
   };
 
+    const getStatusBadge = (status: string = 'active') => {
+    switch (status) {
+      case 'on_leave':
+        return <Badge className="bg-yellow-500/10 text-yellow-400 border-yellow-500/20"><Coffee className="w-3 h-3 mr-1" />On Leave</Badge>;
+      case 'suspended':
+        return <Badge className="bg-red-500/10 text-red-400 border-red-500/20"><Ban className="w-3 h-3 mr-1" />Suspended</Badge>;
+      default:
+        return <Badge className="bg-green-500/10 text-green-400 border-green-500/20"><CheckCircle className="w-3 h-3 mr-1" />Active</Badge>;
+    }
+  };
+
 
 
 export default EmployeeManagement;
