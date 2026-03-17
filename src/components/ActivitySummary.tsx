@@ -1,28 +1,4 @@
 
-interface ActivityLog {
-  id: string;
-  admin_id: string;
-  action: string;
-  details: any;
-  created_at: string;
-  admin?: { name: string; role: string };
-}
-
-interface Admin {
-  id: string;
-  name: string;
-  role: string;
-}
-
-interface DailyActivity {
-  date: string;
-  count: number;
-}
-
-interface ActionBreakdown {
-  name: string;
-  value: number;
-  color: string;
 }
 
 const CHART_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
