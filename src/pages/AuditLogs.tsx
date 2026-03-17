@@ -432,3 +432,70 @@ const AuditLogs: React.FC = () => {
             )}
           </CardContent>
         </Card>
+       {/* Notify Dialog */}
+        <Dialog open={showNotifyDialog} onOpenChange={setShowNotifyDialog}>
+          <DialogContent className="bg-card border-white/10">
+            <DialogHeader>
+              <DialogTitle>Send Login Alert</DialogTitle>
+            </DialogHeader>
+            {selectedLog && (
+              <div className="space-y-4">
+                <div className="p-4 bg-black/30 rounded-lg space-y-2">
+                  <p className="font-medium">{selectedLog.admin_name}</p>
+                  <div className="text-sm text-muted-foreground space-y-1">
+                    <p>IP: {selectedLog.ip || 'Unknown'}</p>
+                    <p>Location: {selectedLog.location || 'Unknown'}</p>
+                    <p>ISP: {selectedLog.isp || 'Unknown'}</p>
+                    <p>Time: {new Date(selectedLog.timestamp).toLocaleString()}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2">
+                    <Checkbox 
+                      checked={notifyAll} 
+                      onCheckedChange={(checked) => setNotifyAll(!!checked)} 
+                    />
+                    <span>Send to all admins</span>
+                  </label>
+                </div>
+
+                {!notifyAll && (
+                  <ScrollArea className="h-[150px] border border-white/10 rounded-md p-2">
+                    {admins.map((admin) => (
+                      <div key={admin.id} className="flex items-center space-x-2 py-2">
+                        <Checkbox
+                          checked={selectedAdmins.includes(admin.id)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedAdmins([...selectedAdmins, admin.id]);
+                            } else {
+                              setSelectedAdmins(selectedAdmins.filter(id => id !== admin.id));
+                            }
+                          }}
+                        />
+                        <span className="text-sm">{admin.name}</span>
+                      </div>
+                    ))}
+                  </ScrollArea>
+                )}
+
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={() => setShowNotifyDialog(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={sendLoginNotification} className="gradient-primary">
+                    <Send className="w-4 h-4 mr-2" />
+                    Send Alert
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+      </div>
+    </ModuleLayout>
+  );
+};
+
+export default AuditLogs;
