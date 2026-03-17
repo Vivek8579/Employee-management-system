@@ -254,3 +254,181 @@ const AuditLogs: React.FC = () => {
       });
     }
   };
+  const getActionIcon = (action: string) => {
+    switch (action) {
+      case 'LOGIN':
+        return <LogIn className="w-4 h-4 text-cyan-400" />;
+      case 'VERIFY_PAYMENT':
+      case 'CREATE_PAYMENT':
+        return <Shield className="w-4 h-4 text-green-400" />;
+      case 'ISSUE_CERTIFICATE':
+        return <Award className="w-4 h-4 text-yellow-400" />;
+      case 'CREATE_INTERNSHIP':
+        return <Briefcase className="w-4 h-4 text-blue-400" />;
+      case 'MARK_ATTENDANCE':
+        return <User className="w-4 h-4 text-purple-400" />;
+      default:
+        return <Activity className="w-4 h-4 text-gray-400" />;
+    }
+  };
+
+  const getActionColor = (action: string) => {
+    switch (action) {
+      case 'LOGIN':
+        return 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20';
+      case 'VERIFY_PAYMENT':
+        return 'bg-green-500/10 text-green-400 border-green-500/20';
+      case 'ISSUE_CERTIFICATE':
+        return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20';
+      case 'MARK_ATTENDANCE':
+        return 'bg-purple-500/10 text-purple-400 border-purple-500/20';
+      default:
+        return 'bg-gray-500/10 text-gray-400 border-gray-500/20';
+    }
+  };
+
+  return (
+    <ModuleLayout
+      title="Audit Logs"
+      description="Track all admin actions, login activity, and system events"
+    >
+      <div className="space-y-6">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className="gradient-card border-white/10">
+            <CardContent className="p-4">
+              <div className="text-center">
+                <p className="text-2xl font-bold text-gradient">{stats.todayActions}</p>
+                <p className="text-sm text-muted-foreground">Today's Actions</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="gradient-card border-white/10">
+            <CardContent className="p-4">
+              <div className="text-center">
+                <p className="text-2xl font-bold text-cyan-400">{stats.todayLogins}</p>
+                <p className="text-sm text-muted-foreground">Today's Logins</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="gradient-card border-white/10">
+            <CardContent className="p-4">
+              <div className="text-center">
+                <p className="text-2xl font-bold text-blue-400">{stats.totalLogs}</p>
+                <p className="text-sm text-muted-foreground">Total Logs</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="gradient-card border-white/10">
+            <CardContent className="p-4">
+              <div className="text-center">
+                <p className="text-2xl font-bold text-purple-400">{stats.uniqueAdmins}</p>
+                <p className="text-sm text-muted-foreground">Active Admins</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Audit Logs Table */}
+        <Card className="gradient-card border-white/10">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="w-5 h-5" />
+              System Activity Logs
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {auditLogs.length === 0 ? (
+              <div className="text-center py-8">
+                <Activity className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">No audit logs available</p>
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Action</TableHead>
+                    <TableHead>Admin</TableHead>
+                    <TableHead>Details</TableHead>
+                    <TableHead>Location</TableHead>
+                    <TableHead>Timestamp</TableHead>
+                    {isSuperAdmin && <TableHead>Actions</TableHead>}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {auditLogs.map((log) => (
+                    <TableRow key={log.id}>
+                      <TableCell>
+                        <div className="flex items-center space-x-2">
+                          {getActionIcon(log.action)}
+                          <Badge className={getActionColor(log.action)}>
+                            {log.action.replace('_', ' ')}
+                          </Badge>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <p className="font-medium">{log.admin_name}</p>
+                          <p className="text-xs text-muted-foreground">{log.admin_email}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell className="max-w-xs">
+                        <p className="text-sm truncate">{log.details}</p>
+                      </TableCell>
+                      <TableCell>
+                        {log.action === 'LOGIN' && log.ip ? (
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-1 text-xs">
+                              <Globe className="w-3 h-3 text-cyan-400" />
+                              <span>{log.ip}</span>
+                            </div>
+                            {log.location && (
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <MapPin className="w-3 h-3" />
+                                <span>{log.location}</span>
+                              </div>
+                            )}
+                            {log.isp && (
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <Wifi className="w-3 h-3" />
+                                <span>{log.isp}</span>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          <p>{new Date(log.timestamp).toLocaleDateString()}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(log.timestamp).toLocaleTimeString()}
+                          </p>
+                        </div>
+                      </TableCell>
+                      {isSuperAdmin && (
+                        <TableCell>
+                          {log.action === 'LOGIN' && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-7 text-xs"
+                              onClick={() => {
+                                setSelectedLog(log);
+                                setShowNotifyDialog(true);
+                              }}
+                            >
+                              <Bell className="w-3 h-3 mr-1" />
+                              Notify
+                            </Button>
+                          )}
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
