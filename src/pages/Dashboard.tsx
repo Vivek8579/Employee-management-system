@@ -1808,6 +1808,97 @@ const Dashboard: React.FC = () => {
               onUnpin={handlePinToggle}
             />
  
+            {/* Category Tabs */}
+            <div className="flex gap-2 flex-wrap mb-5">
+              {MODULE_CATEGORIES.map(cat => {
+                const CatIcon = CATEGORY_ICONS[cat];
+                const count = cat === 'All' ? availableModules.length : availableModules.filter(m => m.category === cat).length;
+                if (count === 0 && cat !== 'All') return null;
+                return (
+                  <button
+                    key={cat}
+                    onClick={() => setActiveCategory(cat)}
+                    className={cn(
+                      "flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all",
+                      activeCategory === cat
+                        ? "bg-primary/20 border-primary/35 text-primary"
+                        : "bg-white/5 border-white/10 text-muted-foreground hover:bg-white/10 hover:text-foreground"
+                    )}
+                  >
+                    <CatIcon className="w-3.5 h-3.5" />
+                    {cat}
+                    <span className={cn("text-xs rounded-full px-1.5 py-0",
+                      activeCategory === cat ? "bg-primary/20" : "bg-white/10"
+                    )}>
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+ 
+            {/* Module Grid / List */}
+            {filteredModules.length === 0 ? (
+              <div className="text-center py-16 text-muted-foreground border border-white/10 rounded-2xl">
+                <Search className="w-10 h-10 mx-auto mb-3 opacity-30" />
+                <p className="text-sm font-medium">No modules found</p>
+                <p className="text-xs mt-1 opacity-60">Try adjusting your search or category filter</p>
+                <Button variant="ghost" size="sm" className="mt-3" onClick={() => { setModuleSearch(''); setActiveCategory('All'); }}>
+                  Clear filters
+                </Button>
+              </div>
+            ) : moduleViewMode === 'grid' ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {filteredModules.map((module, index) => (
+                  <ModuleCardEnhanced
+                    key={index}
+                    card={module}
+                    onClick={() => navigate(module.route)}
+                    isPinned={pinnedModules.includes(module.title)}
+                    onPin={() => handlePinToggle(module.title)}
+                    viewMode="grid"
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {filteredModules.map((module, index) => (
+                  <ModuleCardEnhanced
+                    key={index}
+                    card={module}
+                    onClick={() => navigate(module.route)}
+                    isPinned={pinnedModules.includes(module.title)}
+                    onPin={() => handlePinToggle(module.title)}
+                    viewMode="list"
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+ 
+          {/* ── Footer Info ──────────────────────────────────────────────────── */}
+          <div className="border-t border-white/8 pt-6 mt-4 flex items-center justify-between text-xs text-muted-foreground">
+            <div className="flex items-center gap-4">
+              <span>THRYLOS Admin Panel</span>
+              <Separator orientation="vertical" className="h-3" />
+              <span>{availableModules.length} modules available</span>
+              <Separator orientation="vertical" className="h-3" />
+              <span className="capitalize">{displayProfile.role.replace(/_/g, ' ')}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <PulseRing color="bg-green-400" />
+              <span>Auto-refresh every 5s</span>
+            </div>
+          </div>
+        </div>
+ 
+        {/* ── Floating Notifications ─────────────────────────────────────────── */}
+        <NotificationToast notifications={notifications} />
+      </>
+    </TooltipProvider>
+  );
+};
+ 
 export default Dashboard;
  
             
