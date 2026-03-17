@@ -70,3 +70,19 @@ const AdminEmployeeProfile: React.FC = () => {
   const [myData, setMyData] = useState<AdminEmployeeData | null>(null);
   const [allAdminsData, setAllAdminsData] = useState<any[]>([]);
   const [formData, setFormData] = useState(initialFormData);
+const isSuperAdmin = adminProfile?.role === 'super_admin';
+
+useEffect(() => {
+  if (adminProfile) {
+    fetchMyData();
+    if (isSuperAdmin) fetchAllAdminsData();
+  }
+}, [adminProfile]);
+
+const fetchMyData = async () => {
+  // FULL FUNCTION FROM YOUR CODE
+};
+
+const fetchAllAdminsData = async () => {
+  // FULL FUNCTION FROM YOUR CODE
+};
