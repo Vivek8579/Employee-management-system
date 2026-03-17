@@ -1,56 +1,5 @@
 
 
-  const fetchRealDashboardStats = async () => {
-    try {
-      // Get current month start date for monthly attendance
-      // Use explicit YYYY-MM-DD formatting to avoid locale issues
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const day = String(now.getDate()).padStart(2, '0');
-      const todayStr = `${year}-${month}-${day}`;
-      const monthStart = `${year}-${month}-01`;
-      
-      const [
-        { data: admins },
-        { data: todayAttendanceData },
-        { data: monthlyAttendance },
-        { data: certificates },
-        { data: internships },
-        { data: chatMessages },
-        { data: paymentVerifications },
-        { data: esportsPlayers },
-        { data: socialOrders },
-        { data: socialAnalytics },
-        { data: employees },
-        { data: careerApplications },
-        { data: techWorkLogs },
-        { data: contentWorkLogs },
-        { data: leaveRequests }
-      ] = await Promise.all([
-        supabase.from('admins').select('*'),
-        supabase.from('attendance').select('*').eq('date', todayStr),
-        // Fetch attendance for the current month to calculate monthly stats
-        supabase.from('attendance').select('*')
-          .gte('date', monthStart)
-          .lte('date', todayStr)
-          .eq('admin_id', adminProfile?.id || ''),
-        supabase.from('certificates').select('*'),
-        supabase.from('internships').select('*'),
-        supabase.from('chat_messages').select('*'),
-        supabase.from('payment_verifications').select('*'),
-        supabase.from('esports_players').select('*'),
-        supabase.from('social_media_orders').select('*'),
-        supabase.from('social_media_analytics').select('*'),
-        supabase.from('employees').select('*'),
-        supabase.from('career_applications').select('*'),
-        supabase.from('tech_work_logs').select('*'),
-        supabase.from('content_work_logs').select('*'),
-        adminProfile?.role === 'super_admin' 
-          ? supabase.from('leave_requests').select('*')
-          : supabase.from('leave_requests').select('*').eq('admin_id', adminProfile?.id || '')
-      ]);
-
       // Calculate esports and social revenue
       const esportsRevenue = esportsPlayers?.filter((p: any) => p.payment_received).reduce((sum: number, p: any) => sum + (p.entry_fees || 0), 0) || 0;
       const socialRevenue = socialOrders?.filter((o: any) => o.payment_received).reduce((sum: number, o: any) => sum + (o.payment_amount || 0), 0) || 0;
