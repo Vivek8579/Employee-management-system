@@ -271,6 +271,22 @@ const AdminManagement: React.FC = () => {
   };
 
 
+   const resetForm = () => {
+    setFormData({
+      name: '',
+      email: '',
+      otp_email: '',
+      role: 'social_admin',
+      password: '',
+      avatar: '',
+      avatarFile: null
+    });
+  };
+
+
+  
+
+
 
 export default EmployeeManagement;
 
