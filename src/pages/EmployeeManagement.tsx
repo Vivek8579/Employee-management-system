@@ -291,7 +291,19 @@ const AdminManagement: React.FC = () => {
   };
 
 
-  
+   const openEditDialog = (admin: AdminProfile) => {
+    setFormData({
+      name: admin.name,
+      email: admin.email,
+      otp_email: (admin as any).otp_email || '',
+      role: admin.role as any,
+      password: '',
+      avatar: admin.avatar || '',
+      avatarFile: null
+    });
+    setSelectedAdmin(admin);
+    setDialogOpen(true);
+  };
 
 
 
