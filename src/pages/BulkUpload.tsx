@@ -47,3 +47,32 @@ const fetchUploadStats = async () => {
     console.error('Error fetching upload stats:', error);
   }
 };
+const handleDrag = (e: React.DragEvent) => {
+  e.preventDefault();
+  e.stopPropagation();
+
+  if (e.type === 'dragenter' || e.type === 'dragover') {
+    setDragActive(true);
+  } else if (e.type === 'dragleave') {
+    setDragActive(false);
+  }
+};
+
+const handleDrop = (e: React.DragEvent) => {
+  e.preventDefault();
+  e.stopPropagation();
+  setDragActive(false);
+
+  if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+    handleFiles(e.dataTransfer.files);
+  }
+};
+
+const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const files = event.target.files;
+  if (files) {
+    handleFiles(files);
+  }
+};
+
+
