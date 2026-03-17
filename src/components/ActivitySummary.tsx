@@ -1,32 +1,4 @@
 
-        .select('*')
-        .gte('created_at', last7Days.toISOString())
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      // Process daily activity data
-      const dailyMap = new Map<string, number>();
-      for (let i = 6; i >= 0; i--) {
-        const date = format(subDays(new Date(), i), 'MMM dd');
-        dailyMap.set(date, 0);
-      }
-
-      (data || []).forEach(activity => {
-        const date = format(new Date(activity.created_at), 'MMM dd');
-        if (dailyMap.has(date)) {
-          dailyMap.set(date, (dailyMap.get(date) || 0) + 1);
-        }
-      });
-
-      setDailyData(Array.from(dailyMap.entries()).map(([date, count]) => ({ date, count })));
-
-      // Process action breakdown
-      const actionMap = new Map<string, number>();
-      (data || []).forEach(activity => {
-        const action = activity.action.split(' ')[0]; // Get first word
-        actionMap.set(action, (actionMap.get(action) || 0) + 1);
-      });
 
       const breakdown = Array.from(actionMap.entries())
         .sort((a, b) => b[1] - a[1])
