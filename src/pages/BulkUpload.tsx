@@ -1,78 +1,39 @@
-const BulkUpload: React.FC = () => {
-  const { user, adminProfile } = useAuth();
+const handleFiles = async (files: FileList) => {
+  const file = files[0];
+  if (!file || !user || !adminProfile) return;
 
-  const [uploadStats, setUploadStats] = useState({
-    filesUploaded: 0,
-    successRate: 0,
-    recordsProcessed: 0
-  });
-
-  const [uploading, setUploading] = useState(false);
-  const [dragActive, setDragActive] = useState(false);
-
-  return (
-    <ModuleLayout
-      title="Bulk Upload & Import"
-      description="Upload CSV/Excel files for tournaments and orders with smart validation"
-    >
-      {/* UI Cards + Upload Section */}
-    </ModuleLayout>
-  );
-};
-
-useEffect(() => {
-  fetchUploadStats();
-}, []);
-
-const fetchUploadStats = async () => {
-  try {
-    const [
-      { count: esportsCount },
-      { count: socialCount },
-      { count: filesCount }
-    ] = await Promise.all([
-      supabase.from('esports_players').select('*', { count: 'exact', head: true }),
-      supabase.from('social_media_orders').select('*', { count: 'exact', head: true }),
-      supabase.from('uploaded_files').select('*', { count: 'exact', head: true })
-    ]);
-
-    const totalRecords = (esportsCount || 0) + (socialCount || 0);
-
-    setUploadStats({
-      filesUploaded: filesCount || 0,
-      successRate: totalRecords > 0 ? 95 : 0,
-      recordsProcessed: totalRecords
+  if (!file.name.endsWith('.csv') && !file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+    toast({
+      title: 'Invalid File Type',
+      description: 'Please upload CSV or Excel files only.',
+      variant: 'destructive'
     });
+    return;
+  }
+
+  setUploading(true);
+
+  try {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${adminProfile.id}/bulk_upload_${Date.now()}.${fileExt}`;
+
+    await supabase.storage.from('uploads').upload(fileName, file);
+
+    await supabase.from('uploaded_files').insert({
+      name: file.name,
+      file_path: fileName,
+      file_size: file.size,
+      mime_type: file.type,
+      uploaded_by: adminProfile.id
+    } as any);
+
   } catch (error) {
-    console.error('Error fetching upload stats:', error);
+    toast({
+      title: 'Upload Failed',
+      description: 'Failed to upload file',
+      variant: 'destructive'
+    });
+  } finally {
+    setUploading(false);
   }
 };
-const handleDrag = (e: React.DragEvent) => {
-  e.preventDefault();
-  e.stopPropagation();
-
-  if (e.type === 'dragenter' || e.type === 'dragover') {
-    setDragActive(true);
-  } else if (e.type === 'dragleave') {
-    setDragActive(false);
-  }
-};
-
-const handleDrop = (e: React.DragEvent) => {
-  e.preventDefault();
-  e.stopPropagation();
-  setDragActive(false);
-
-  if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-    handleFiles(e.dataTransfer.files);
-  }
-};
-
-const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-  const files = event.target.files;
-  if (files) {
-    handleFiles(files);
-  }
-};
-
-
