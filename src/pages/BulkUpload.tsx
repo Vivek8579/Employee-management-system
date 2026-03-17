@@ -71,3 +71,19 @@ const processCsvData = async (dataLines: string[], headers: string[]): Promise<U
 
   return result;
 };
+const downloadTemplate = async (type: string) => {
+  let csvContent = '';
+
+  if (type === 'esports') {
+    csvContent = 'player_name,tournament_name,email\n';
+  } else {
+    csvContent = 'service_type,order_type,quantity\n';
+  }
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+
+  link.href = URL.createObjectURL(blob);
+  link.download = `${type}_template.csv`;
+  link.click();
+};
