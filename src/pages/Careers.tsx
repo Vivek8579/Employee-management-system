@@ -1,7 +1,32 @@
-// ===================== LOGIC =====================
+import React, { useState, useRef, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import {
+  Loader2,
+  Upload,
+  FileText,
+  Shield,
+  Briefcase,
+  Users,
+  Rocket,
+  Heart,
+  ChevronDown
+} from 'lucide-react';
+
+// ===================== COMPONENT =====================
 const Careers: React.FC = () => {
   const { toast } = useToast();
 
+  // ===================== STATE =====================
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const formRef = useRef<HTMLDivElement>(null);
@@ -19,37 +44,48 @@ const Careers: React.FC = () => {
     yearsOfExperience: '',
     skills: '',
     whyJoinThrylos: '',
-    additionalNotes: '',
+    additionalNotes: ''
   });
 
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [aadharFile, setAadharFile] = useState<File | null>(null);
   const [additionalFiles, setAdditionalFiles] = useState<File[]>([]);
 
+  // ===================== EFFECTS =====================
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
+
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // ===================== HELPERS =====================
   const scrollToForm = () => {
     formRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
-  const uploadFile = async (file: File, folder: string): Promise<string | null> => {
+  const uploadFile = async (
+    file: File,
+    folder: string
+  ): Promise<string | null> => {
     const fileExt = file.name.split('.').pop();
-    const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+    const fileName = `${folder}/${Date.now()}-${Math.random()
+      .toString(36)
+      .substring(7)}.${fileExt}`;
 
     const { error } = await supabase.storage
       .from('career-documents')
       .upload(fileName, file);
 
     if (error) {
-      console.error(error);
+      console.error('Upload error:', error);
       return null;
     }
 
@@ -60,69 +96,104 @@ const Careers: React.FC = () => {
     return data.publicUrl;
   };
 
+  // ===================== SUBMIT =====================
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.fullName || !formData.mobileNumber || !formData.email || !formData.roleAppliedFor) {
-      toast({ title: "Error", description: "Fill required fields", variant: "destructive" });
+    if (
+      !formData.fullName ||
+      !formData.mobileNumber ||
+      !formData.email ||
+      !formData.roleAppliedFor
+    ) {
+      toast({
+        title: 'Error',
+        description: 'Fill required fields',
+        variant: 'destructive'
+      });
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      let resumeUrl = null;
-      let aadharUrl = null;
+      let resumeUrl: string | null = null;
+      let aadharUrl: string | null = null;
       const additionalDocUrls: string[] = [];
 
-      if (resumeFile) resumeUrl = await uploadFile(resumeFile, 'resumes');
-      if (aadharFile) aadharUrl = await uploadFile(aadharFile, 'aadhar');
+      if (resumeFile) {
+        resumeUrl = await uploadFile(resumeFile, 'resumes');
+      }
+
+      if (aadharFile) {
+        aadharUrl = await uploadFile(aadharFile, 'aadhar');
+      }
 
       for (const file of additionalFiles) {
         const url = await uploadFile(file, 'additional');
         if (url) additionalDocUrls.push(url);
       }
 
-      const { error } = await supabase.from('career_applications').insert({
-        full_name: formData.fullName,
-        mobile_number: formData.mobileNumber,
-        email: formData.email,
-        full_address: formData.fullAddress,
-        city: formData.city,
-        state: formData.state,
-        country: formData.country,
-        date_of_birth: formData.dateOfBirth || null,
-        role_applied_for: formData.roleAppliedFor,
-        years_of_experience: formData.yearsOfExperience,
-        skills: formData.skills,
-        why_join_thrylos: formData.whyJoinThrylos,
-        additional_notes: formData.additionalNotes,
-        resume_url: resumeUrl,
-        aadhar_url: aadharUrl,
-        additional_documents: additionalDocUrls,
-      });
+      const { error } = await supabase
+        .from('career_applications')
+        .insert({
+          full_name: formData.fullName,
+          mobile_number: formData.mobileNumber,
+          email: formData.email,
+          full_address: formData.fullAddress,
+          city: formData.city,
+          state: formData.state,
+          country: formData.country,
+          date_of_birth: formData.dateOfBirth || null,
+          role_applied_for: formData.roleAppliedFor,
+          years_of_experience: formData.yearsOfExperience,
+          skills: formData.skills,
+          why_join_thrylos: formData.whyJoinThrylos,
+          additional_notes: formData.additionalNotes,
+          resume_url: resumeUrl,
+          aadhar_url: aadharUrl,
+          additional_documents: additionalDocUrls
+        });
 
       if (error) throw error;
 
-      toast({ title: "Success", description: "Application submitted!" });
+      toast({
+        title: 'Success',
+        description: 'Application submitted!'
+      });
 
     } catch (error: any) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      toast({
+        title: 'Error',
+        description: error?.message || 'Something went wrong',
+        variant: 'destructive'
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
-  const roles = ['Developer','Designer','Marketing','Community Manager','Operations','Content Creator','Other'];
 
-  const stackCards = [
-    { icon: <Rocket />, title: "Innovation First", description: "Pushing esports tech." },
-    { icon: <Users />, title: "Team Spirit", description: "Competitive mindset." },
-    { icon: <Briefcase />, title: "Growth", description: "Real mentorship." },
-    { icon: <Shield />, title: "Secure Future", description: "Fast-growing org." },
-    { icon: <Heart />, title: "Balance", description: "Healthy work culture." },
-    { icon: <FileText />, title: "Learning", description: "Skill-first culture." }
+  // ===================== DATA =====================
+  const roles = [
+    'Developer',
+    'Designer',
+    'Marketing',
+    'Community Manager',
+    'Operations',
+    'Content Creator',
+    'Other'
   ];
 
+  const stackCards = [
+    { icon: <Rocket />, title: 'Innovation First', description: 'Pushing esports tech.' },
+    { icon: <Users />, title: 'Team Spirit', description: 'Competitive mindset.' },
+    { icon: <Briefcase />, title: 'Growth', description: 'Real mentorship.' },
+    { icon: <Shield />, title: 'Secure Future', description: 'Fast-growing org.' },
+    { icon: <Heart />, title: 'Balance', description: 'Healthy work culture.' },
+    { icon: <FileText />, title: 'Learning', description: 'Skill-first culture.' }
+  ];
+
+  // ===================== UI =====================
   return (
     <div className="min-h-screen bg-black">
 
@@ -142,15 +213,16 @@ const Careers: React.FC = () => {
           {stackCards.map((card, i) => (
             <div key={i} className="p-6 border rounded-lg">
               {card.icon}
-              <h4>{card.title}</h4>
-              <p>{card.description}</p>
+              <h4 className="text-white font-semibold mt-2">{card.title}</h4>
+              <p className="text-muted-foreground">{card.description}</p>
             </div>
           ))}
         </div>
       </section>
-            {/* FORM */}
-      <section ref={formRef} className="py-20">
-        <form onSubmit={handleSubmit} className="space-y-6">
+
+      {/* FORM */}
+      <section ref={formRef} className="py-20 px-4">
+        <form onSubmit={handleSubmit} className="space-y-6 max-w-xl mx-auto">
 
           <Input
             value={formData.fullName}
@@ -164,24 +236,37 @@ const Careers: React.FC = () => {
             placeholder="Email"
           />
 
-          <Select onValueChange={(v) => handleInputChange('roleAppliedFor', v)}>
+          <Select
+            onValueChange={(v) => handleInputChange('roleAppliedFor', v)}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Role" />
             </SelectTrigger>
+
             <SelectContent>
-              {roles.map(role => (
-                <SelectItem key={role} value={role}>{role}</SelectItem>
+              {roles.map((role) => (
+                <SelectItem key={role} value={role}>
+                  {role}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
 
-          {/* FILE UPLOAD */}
-          <input type="file" onChange={(e) => setResumeFile(e.target.files?.[0] || null)} />
+          {/* FILE */}
+          <input
+            type="file"
+            onChange={(e) =>
+              setResumeFile(e.target.files?.[0] || null)
+            }
+          />
 
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? <Loader2 className="animate-spin" /> : 'Apply'}
+          <Button type="submit" disabled={isSubmitting} className="w-full">
+            {isSubmitting ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              'Apply'
+            )}
           </Button>
-
         </form>
       </section>
 
@@ -194,4 +279,3 @@ const Careers: React.FC = () => {
 };
 
 export default Careers;
-  
