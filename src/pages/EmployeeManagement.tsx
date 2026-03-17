@@ -243,6 +243,23 @@ const AdminManagement: React.FC = () => {
         'suspended': 'Admin has been suspended - they cannot login'
       };
 
+      toast({
+        title: "Status Updated",
+        description: statusMessages[status] || 'Status updated successfully'
+      });
+
+      fetchAdmins();
+    } catch (error: any) {
+      console.error('Error updating admin status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update admin status",
+        variant: "destructive"
+      });
+    }
+  };
+
+
 
 export default EmployeeManagement;
 
