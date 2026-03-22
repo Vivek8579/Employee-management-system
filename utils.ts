@@ -1,26 +1,72 @@
+// ============================================================
 // utils.ts
-// Pure utility functions for AttendanceTracker
+// Advanced Utility Functions for Attendance Tracker System
+// ============================================================
 
-import { format, startOfMonth, endOfMonth } from 'date-fns';
+import {
+  format,
+  startOfMonth,
+  endOfMonth,
+  isSameMonth,
+  isSameDay,
+  parseISO,
+} from 'date-fns';
+
+// ============================================================
+// TYPES & INTERFACES
+// ============================================================
+
+export type AttendanceStatus = 'present' | 'late' | 'absent';
+
+export interface Admin {
+  id: string;
+  name: string;
+  email: string;
+  role?: string;
+}
+
+export interface AttendanceRecord {
+  date: string;
+  status: AttendanceStatus;
+  admin_id?: string;
+  marked_at?: string;
+  reason?: string;
+  admin?: Admin;
+}
+
+export interface MonthlyStats {
+  present: number;
+  late: number;
+  absent: number;
+  totalDays: number;
+  score: number;
+  percentage: number;
+}
+
+// ============================================================
+// TIME BASED UTILITIES
+// ============================================================
 
 /**
- * Returns attendance status based on the current time of day.
- * 06:00–10:59 → present
- * 11:00–16:59 → late
- * 17:00+      → absent
+ * Convert time into total minutes
  */
-export const getCurrentTimeBasedStatus = (date = new Date()): string => {
-  const hours = date.getHours();
-  const minutes = date.getMinutes();
-  const totalMinutes = hours * 60 + minutes;
+export const convertToMinutes = (hours: number, minutes: number): number => {
+  return hours * 60 + minutes;
+};
 
-  if (totalMinutes >= 360 && totalMinutes < 660) return 'present'; // 6:00–10:59
-  if (totalMinutes >= 660 && totalMinutes < 1020) return 'late';   // 11:00–16:59
+/**
+ * Returns attendance status based on time
+ */
+export const getCurrentTimeBasedStatus = (date = new Date()): AttendanceStatus => {
+  const totalMinutes = convertToMinutes(date.getHours(), date.getMinutes());
+
+  if (totalMinutes >= 360 && totalMinutes < 660) return 'present';
+  if (totalMinutes >= 660 && totalMinutes < 1020) return 'late';
   return 'absent';
 };
 
 /**
- * Returns a UI-friendly label and color for the current time window.
+ * Get readable message for UI
  */
 export const getTimeBasedMessage = () => {
   const now = new Date();
@@ -28,109 +74,229 @@ export const getTimeBasedMessage = () => {
 
   if (hours >= 6 && hours < 11) {
     return { status: 'Present', message: 'Mark now', color: 'text-blue-500' };
-  } else if (hours >= 11 && hours < 17) {
-    return { status: 'Late', message: 'Late', color: 'text-gray-400' };
-  } else if (hours >= 17) {
-    return { status: 'Absent', message: 'Absent', color: 'text-gray-500' };
-  } else {
-    return { status: 'Early', message: 'Attendance opens at 6 AM', color: 'text-gray-500' };
   }
+  if (hours >= 11 && hours < 17) {
+    return { status: 'Late', message: 'Late Entry', color: 'text-yellow-500' };
+  }
+  if (hours >= 17) {
+    return { status: 'Absent', message: 'Marked Absent', color: 'text-red-500' };
+  }
+
+  return { status: 'Early', message: 'Attendance opens at 6 AM', color: 'text-gray-400' };
+};
+
+// ============================================================
+// STATUS UTILITIES
+// ============================================================
+
+export const getStatusBadgeClass = (status: AttendanceStatus): string => {
+  const base = 'px-3 py-1 rounded-full text-sm font-medium border';
+
+  const styles: Record<AttendanceStatus, string> = {
+    present: `${base} bg-blue-500 text-white border-blue-500`,
+    late: `${base} bg-yellow-500 text-black border-yellow-500`,
+    absent: `${base} bg-red-500 text-white border-red-500`,
+  };
+
+  return styles[status] || `${base} bg-gray-500 text-white`;
 };
 
 /**
- * Returns the Tailwind CSS classes for a given attendance status badge.
+ * Get readable label
  */
-export const getStatusBadgeClass = (status: string): string => {
-  switch (status) {
-    case 'present':
-      return 'bg-blue-500 text-white border-blue-500';
-    case 'absent':
-      return 'bg-gray-700 text-white border-gray-700';
-    case 'late':
-      return 'bg-gray-500 text-white border-gray-500';
-    default:
-      return 'bg-gray-600 text-white border-gray-600';
-  }
+export const getStatusLabel = (status: AttendanceStatus): string => {
+  return status.charAt(0).toUpperCase() + status.slice(1);
 };
 
-/**
- * Computes monthly attendance stats for a given set of records.
- */
+// ============================================================
+// DATE UTILITIES
+// ============================================================
+
+export const getMonthRange = (date: Date) => ({
+  start: startOfMonth(date),
+  end: endOfMonth(date),
+});
+
+export const isToday = (date: string) => {
+  return isSameDay(parseISO(date), new Date());
+};
+
+export const isCurrentMonth = (date: Date) => {
+  return isSameMonth(date, new Date());
+};
+
+// ============================================================
+// VALIDATION UTILITIES
+// ============================================================
+
+export const isValidAttendanceRecord = (record: any): record is AttendanceRecord => {
+  return (
+    record &&
+    typeof record.date === 'string' &&
+    ['present', 'late', 'absent'].includes(record.status)
+  );
+};
+
+// ============================================================
+// STATISTICS UTILITIES
+// ============================================================
+
 export const computeMonthlyStats = (
-  monthlyAttendance: any[],
+  monthlyAttendance: AttendanceRecord[],
   selectedMonth: Date,
   adminId?: string
-) => {
-  const relevantAttendance = adminId
+): MonthlyStats => {
+  const filtered = adminId
     ? monthlyAttendance.filter(a => a.admin_id === adminId)
     : monthlyAttendance;
 
-  const present = relevantAttendance.filter(a => a.status === 'present').length;
-  const late = relevantAttendance.filter(a => a.status === 'late').length;
+  const present = filtered.filter(a => a.status === 'present').length;
+  const late = filtered.filter(a => a.status === 'late').length;
 
   const today = new Date();
-  const isCurrentMonth =
-    today.getMonth() === selectedMonth.getMonth() &&
-    today.getFullYear() === selectedMonth.getFullYear();
-
-  const totalDays = isCurrentMonth
+  const totalDays = isSameMonth(today, selectedMonth)
     ? today.getDate()
     : endOfMonth(selectedMonth).getDate();
 
   const absent = Math.max(totalDays - (present + late), 0);
   const score = present + late * 0.5;
-  const percentage = totalDays > 0 ? Math.round((score / totalDays) * 100) : 0;
+
+  const percentage = totalDays > 0
+    ? Math.round((score / totalDays) * 100)
+    : 0;
 
   return { present, late, absent, totalDays, score, percentage };
 };
 
 /**
- * Computes today's overall attendance stats across all admins.
+ * Compute today's stats
  */
-export const computeAttendanceStats = (allAdmins: any[], todayAttendance: any[]) => {
+export const computeAttendanceStats = (
+  allAdmins: Admin[],
+  todayAttendance: AttendanceRecord[]
+) => {
   const total = allAdmins.length;
-  const present = todayAttendance.filter(a => a.status === 'present').length;
-  const absent = todayAttendance.filter(a => a.status === 'absent').length;
-  const late = todayAttendance.filter(a => a.status === 'late').length;
-  const notMarked = total - todayAttendance.length;
-  const percentage = total > 0 ? Math.round((present / total) * 100) : 0;
 
-  return { total, present, absent, late, notMarked, percentage };
+  const counts = {
+    present: 0,
+    late: 0,
+    absent: 0,
+  };
+
+  todayAttendance.forEach(record => {
+    if (counts[record.status] !== undefined) {
+      counts[record.status]++;
+    }
+  });
+
+  const notMarked = total - todayAttendance.length;
+
+  const percentage = total > 0
+    ? Math.round((counts.present / total) * 100)
+    : 0;
+
+  return {
+    total,
+    ...counts,
+    notMarked,
+    percentage,
+  };
+};
+
+// ============================================================
+// CSV UTILITIES
+// ============================================================
+
+/**
+ * Escape CSV values safely
+ */
+export const escapeCSV = (value: any): string => {
+  return `"${String(value).replace(/"/g, '""')}"`;
 };
 
 /**
- * Builds and triggers a CSV download for the given attendance records.
+ * Convert data to CSV string
  */
-export const buildAndDownloadCSV = (
-  data: any[],
-  allAdmins: any[],
-  adminId: string | undefined,
-  selectedMonth: Date
-) => {
-  const headers = ['Date', 'Admin Name', 'Email', 'Role', 'Status', 'Check-in Time', 'Reason'];
-  const rows = (data || []).map(record => [
+export const convertToCSV = (data: AttendanceRecord[]): string => {
+  const headers = ['Date', 'Name', 'Email', 'Role', 'Status', 'Time', 'Reason'];
+
+  const rows = data.map(record => [
     record.date,
     record.admin?.name || 'Unknown',
     record.admin?.email || '',
-    record.admin?.role?.replace('_', ' ') || '',
+    record.admin?.role || '',
     record.status,
     record.marked_at ? format(new Date(record.marked_at), 'HH:mm:ss') : '',
-    record.reason || ''
+    record.reason || '',
   ]);
 
-  const csvContent = [
+  return [
     headers.join(','),
-    ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+    ...rows.map(row => row.map(escapeCSV).join(',')),
   ].join('\n');
+};
 
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+/**
+ * Download CSV file
+ */
+export const downloadCSV = (content: string, filename: string) => {
+  const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
+
   link.href = url;
+  link.download = filename;
+  link.click();
+
+  URL.revokeObjectURL(url);
+};
+
+/**
+ * Main CSV builder
+ */
+export const buildAndDownloadCSV = (
+  data: AttendanceRecord[],
+  allAdmins: Admin[],
+  adminId: string | undefined,
+  selectedMonth: Date
+) => {
+  const csv = convertToCSV(data);
+
   const adminName = adminId
     ? allAdmins.find(a => a.id === adminId)?.name || 'admin'
     : 'all-admins';
-  link.download = `attendance-${adminName}-${format(selectedMonth, 'yyyy-MM')}.csv`;
-  link.click();
-  URL.revokeObjectURL(url);
+
+  const filename = `attendance-${adminName}-${format(selectedMonth, 'yyyy-MM')}.csv`;
+
+  downloadCSV(csv, filename);
 };
+
+// ============================================================
+// LOGGING UTILITIES (DEBUGGING)
+// ============================================================
+
+export const logInfo = (message: string, data?: any) => {
+  console.log(`[INFO]: ${message}`, data || '');
+};
+
+export const logError = (message: string, error?: any) => {
+  console.error(`[ERROR]: ${message}`, error || '');
+};
+
+// ============================================================
+// PERFORMANCE UTILITIES
+// ============================================================
+
+export const debounce = (func: Function, delay: number) => {
+  let timeout: any;
+
+  return (...args: any[]) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), delay);
+  };
+};
+
+// ============================================================
+// END OF FILE
+// ============================================================
