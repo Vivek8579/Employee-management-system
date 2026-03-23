@@ -143,3 +143,20 @@ const generateCertificateId = () => {
   const random6Digits = Math.floor(100000 + Math.random() * 900000);
   return `MU${random6Digits}`;
 };
+actions={
+  <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+    <DialogTrigger asChild>
+      <Button className="gradient-primary">
+        <Plus className="w-4 h-4 mr-2" />
+        Issue Certificate
+      </Button>
+    </DialogTrigger>
+    <DialogContent className="bg-card border-white/10">
+      <DialogHeader>
+        <DialogTitle>Issue New Certificate</DialogTitle>
+      </DialogHeader>
+
+      {/* form fields + buttons EXACT same as your original */}
+    </DialogContent>
+  </Dialog>
+}
