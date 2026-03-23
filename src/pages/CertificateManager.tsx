@@ -89,6 +89,55 @@ const filteredCertificates = certificates.filter(cert =>
   (cert.certificate_id || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
   (cert.course_name || cert.certificate_type || '').toLowerCase().includes(searchTerm.toLowerCase())
 );
+const handleAddCertificate = async () => {
+  if (!adminProfile) return;
+
+  if (!formData.certificate_id || !formData.participant_name || !formData.participant_email || !formData.course_name) {
+    toast({
+      title: "Error",
+      description: "Please fill in all fields",
+      variant: "destructive"
+    });
+    return;
+  }
+
+  try {
+    const { error } = await supabase
+      .from('certificates')
+      .insert({
+        certificate_id: formData.certificate_id,
+        recipient_name: formData.participant_name,
+        certificate_type: formData.course_name,
+        participant_name: formData.participant_name,
+        participant_email: formData.participant_email,
+        course_name: formData.course_name,
+        issued_by: adminProfile.id
+      } as any);
+
+    if (error) throw error;
+
+    toast({
+      title: "Success",
+      description: "Certificate issued successfully"
+    });
+
+    setDialogOpen(false);
+    setFormData({
+      certificate_id: '',
+      participant_name: '',
+      participant_email: '',
+      course_name: ''
+    });
+    fetchCertificates();
+  } catch (error: any) {
+    console.error('Error issuing certificate:', error);
+    toast({
+      title: "Error",
+      description: error.message || "Failed to issue certificate",
+      variant: "destructive"
+    });
+  }
+};
 
 const generateCertificateId = () => {
   const random6Digits = Math.floor(100000 + Math.random() * 900000);
