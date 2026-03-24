@@ -17,6 +17,7 @@ import { Database } from '@/types/database';
 import { useToast } from '@/components/ui/use-toast';
 import { roleNames } from '@/types/auth';
 import { castToAdminProfiles } from '@/utils/adminTypeCasting';
+import AccessRestrictedState from '@/components/AccessRestrictedState';
 
 type AdminProfile = Database['public']['Tables']['admins']['Row'] & { status?: string };
 
@@ -458,10 +459,7 @@ export default AdminManagement;
   if (adminProfile?.role !== 'super_admin') {
     return (
       <ModuleLayout title="Access Denied">
-        <div className="text-center py-12">
-          <h3 className="text-lg font-semibold mb-2">Access Restricted</h3>
-          <p className="text-muted-foreground">Only Super Admins can access this module.</p>
-        </div>
+        <AccessRestrictedState />
       </ModuleLayout>
     );
   }
