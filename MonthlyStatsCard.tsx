@@ -14,7 +14,8 @@ import { CHART_COLORS } from './types';
 
 interface MonthlyStatsCardProps {
   selectedMonth: Date;
-  setSelectedMonth: (date: Date) => void;
+  setSelectedMonth: (date: Date | null) => void; // allow reset
+
   myStats: {
     present: number;
     late: number;
@@ -22,7 +23,10 @@ interface MonthlyStatsCardProps {
     totalDays: number;
     score: number;
     percentage: number;
+    leave?: number; // new optional field
   };
+
+  isLoading?: boolean; // optional loading state
 }
 
 const MonthlyStatsCard: React.FC<MonthlyStatsCardProps> = ({
