@@ -33,23 +33,48 @@ import {
 import NotificationBell from '@/components/NotificationBell';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
+// Use a const assertion for stronger type inference if reused elsewhere
+export const ADMIN_STATUSES = ['online', 'away', 'busy'] as const;
+export type AdminStatus = typeof ADMIN_STATUSES[number];
 
-type AdminStatus = 'online' | 'away' | 'busy';
+// Optional: reusable Tailwind class type for better semantics
+type TailwindClass = string;
 
-interface StatusConfig {
-  label: string;
-  color: string;        // Tailwind bg colour
-  ringColor: string;    // Tailwind ring colour
-  icon: React.ReactNode;
-  dotClass: string;
+// Centralized icon type (helps if you later swap icon systems)
+type IconType = React.ReactNode;
+
+export interface StatusConfig {
+  /** Display label for the status */
+  readonly label: string;
+
+  /** Tailwind background color class */
+  readonly color: TailwindClass;
+
+  /** Tailwind ring color class */
+  readonly ringColor: TailwindClass;
+
+  /** Icon representing the status */
+  readonly icon: IconType;
+
+  /** Tailwind classes for the status dot */
+  readonly dotClass: TailwindClass;
 }
 
-interface QuickAction {
-  label: string;
-  shortcut: string;
-  keys: string[];       // key combos to match e.g. ['g', 'h']
-  icon: React.ReactNode;
-  path: string;
+export interface QuickAction {
+  /** Display label for the action */
+  readonly label: string;
+
+  /** Human-readable shortcut (e.g. "⌘ + H") */
+  readonly shortcut: string;
+
+  /** Key combination to trigger the action (order-sensitive) */
+  readonly keys: ReadonlyArray<string>;
+
+  /** Icon for the action */
+  readonly icon: IconType;
+
+  /** Navigation path */
+  readonly path: string;
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
