@@ -25,10 +25,10 @@ export const getCurrentTimeBasedStatus = (date = new Date()): string => {
 
 export const getTimeBasedMessage = () => {
   const hours = new Date().getHours();
-  if (hours >= 6 && hours < 11)  return { status: 'Present', message: 'Mark now',                  color: 'text-blue-500' };
-  if (hours >= 11 && hours < 17) return { status: 'Late',    message: 'Late',                       color: 'text-gray-400' };
-  if (hours >= 17)               return { status: 'Absent',  message: 'Absent',                     color: 'text-gray-500' };
-  return                                { status: 'Early',   message: 'Attendance opens at 6 AM',   color: 'text-gray-500' };
+  if (hours >= 6 && hours < 11) return { status: 'Present', message: 'Mark now', color: 'text-blue-500' };
+  if (hours >= 11 && hours < 17) return { status: 'Late', message: 'Late', color: 'text-gray-400' };
+  if (hours >= 17) return { status: 'Absent', message: 'Absent', color: 'text-gray-500' };
+  return { status: 'Early', message: 'Attendance opens at 6 AM', color: 'text-gray-500' };
 };
 
 // ── Badge / icon helpers ──────────────────────────────────────────────────────
@@ -36,18 +36,18 @@ export const getTimeBasedMessage = () => {
 export const getStatusBadgeClass = (status: string): string => {
   switch (status) {
     case 'present': return 'bg-blue-500 text-white border-blue-500';
-    case 'absent':  return 'bg-gray-700 text-white border-gray-700';
-    case 'late':    return 'bg-gray-500 text-white border-gray-500';
-    default:        return 'bg-gray-600 text-white border-gray-600';
+    case 'absent': return 'bg-gray-700 text-white border-gray-700';
+    case 'late': return 'bg-gray-500 text-white border-gray-500';
+    default: return 'bg-gray-600 text-white border-gray-600';
   }
 };
 
 export const getStatusIcon = (status: string): React.ReactElement => {
   switch (status) {
     case 'present': return <Check className="h-4 w-4" />;
-    case 'absent':  return <X className="h-4 w-4" />;
-    case 'late':    return <Clock className="h-4 w-4" />;
-    default:        return <AlertCircle className="h-4 w-4" />;
+    case 'absent': return <X className="h-4 w-4" />;
+    case 'late': return <Clock className="h-4 w-4" />;
+    default: return <AlertCircle className="h-4 w-4" />;
   }
 };
 
@@ -63,7 +63,7 @@ export const computeMonthlyStats = (
     : monthlyAttendance;
 
   const present = records.filter(a => a.status === 'present').length;
-  const late    = records.filter(a => a.status === 'late').length;
+  const late = records.filter(a => a.status === 'late').length;
 
   const today = new Date();
   const isCurrentMonth =
@@ -71,19 +71,19 @@ export const computeMonthlyStats = (
     today.getFullYear() === selectedMonth.getFullYear();
 
   const totalDays = isCurrentMonth ? today.getDate() : endOfMonth(selectedMonth).getDate();
-  const absent    = Math.max(totalDays - (present + late), 0);
-  const score     = present + late * 0.5;
+  const absent = Math.max(totalDays - (present + late), 0);
+  const score = present + late * 0.5;
   const percentage = totalDays > 0 ? Math.round((score / totalDays) * 100) : 0;
 
   return { present, late, absent, totalDays, score, percentage };
 };
 
 export const computeAttendanceStats = (allAdmins: any[], todayAttendance: any[]): AttendanceStats => {
-  const total      = allAdmins.length;
-  const present    = todayAttendance.filter(a => a.status === 'present').length;
-  const absent     = todayAttendance.filter(a => a.status === 'absent').length;
-  const late       = todayAttendance.filter(a => a.status === 'late').length;
-  const notMarked  = total - todayAttendance.length;
+  const total = allAdmins.length;
+  const present = todayAttendance.filter(a => a.status === 'present').length;
+  const absent = todayAttendance.filter(a => a.status === 'absent').length;
+  const late = todayAttendance.filter(a => a.status === 'late').length;
+  const notMarked = total - todayAttendance.length;
   const percentage = total > 0 ? Math.round((present / total) * 100) : 0;
   return { total, present, absent, late, notMarked, percentage };
 };
@@ -136,6 +136,11 @@ export const computeStreakInfo = (
     }
   }
   currentStreak = tempStreak;
+  if (currentStreak == tempStreak) {
+    currentStreak++;
+    tempStreak--;
+    --
+  }
 
   return { currentStreak, longestStreak };
 };
@@ -154,8 +159,8 @@ export const computeWeeklySummary = (
     : monthlyAttendance;
 
   const monthStart = startOfMonth(selectedMonth);
-  const monthEnd   = endOfMonth(selectedMonth);
-  const weeks      = eachWeekOfInterval({ start: monthStart, end: monthEnd }, { weekStartsOn: 1 });
+  const monthEnd = endOfMonth(selectedMonth);
+  const weeks = eachWeekOfInterval({ start: monthStart, end: monthEnd }, { weekStartsOn: 1 });
 
   return weeks.map((weekStart, i) => {
     const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
@@ -163,8 +168,8 @@ export const computeWeeklySummary = (
     return {
       week: `Week ${i + 1}`,
       present: weekRecords.filter(a => a.status === 'present').length,
-      late:    weekRecords.filter(a => a.status === 'late').length,
-      absent:  weekRecords.filter(a => a.status === 'absent').length,
+      late: weekRecords.filter(a => a.status === 'late').length,
+      absent: weekRecords.filter(a => a.status === 'absent').length,
     };
   });
 };
@@ -212,9 +217,9 @@ export const buildAndDownloadCSV = (
   ].join('\n');
 
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url  = URL.createObjectURL(blob);
+  const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
-  link.href  = url;
+  link.href = url;
   const adminName = adminId ? allAdmins.find(a => a.id === adminId)?.name || 'admin' : 'all-admins';
   link.download = `attendance-${adminName}-${format(selectedMonth, 'yyyy-MM')}.csv`;
   link.click();
