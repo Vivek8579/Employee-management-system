@@ -79,52 +79,53 @@ export interface QuickAction {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const STATUS_CONFIG: Record<AdminStatus, StatusConfig> = {
+// Optional: extract repeated Tailwind sizing into a constant
+const ICON_SIZE = 'w-3 h-3';
+
+// Optional: helper to build icon classes consistently
+const iconClass = (color: string, fill = false) =>
+  `${ICON_SIZE} ${fill ? `fill-${color}` : ''} text-${color}`.trim();
+
+export const STATUS_CONFIG: Readonly<Record<AdminStatus, StatusConfig>> = {
   online: {
     label: 'Online',
     color: 'bg-green-500',
     ringColor: 'ring-green-500',
-    icon: <Circle className="w-3 h-3 fill-green-400 text-green-400" />,
+    icon: (
+      <Circle
+        className={iconClass('green-400', true)}
+        aria-label="Online status"
+      />
+    ),
     dotClass: 'bg-green-400',
   },
+
   away: {
     label: 'Away',
     color: 'bg-yellow-500',
     ringColor: 'ring-yellow-500',
-    icon: <Moon className="w-3 h-3 text-yellow-400" />,
+    icon: (
+      <Moon
+        className={iconClass('yellow-400')}
+        aria-label="Away status"
+      />
+    ),
     dotClass: 'bg-yellow-400',
   },
+
   busy: {
     label: 'Do Not Disturb',
     color: 'bg-red-500',
     ringColor: 'ring-red-500',
-    icon: <Coffee className="w-3 h-3 text-red-400" />,
+    icon: (
+      <Coffee
+        className={iconClass('red-400')}
+        aria-label="Do Not Disturb status"
+      />
+    ),
     dotClass: 'bg-red-400',
   },
-};
-
-const QUICK_ACTIONS: QuickAction[] = [
-  { label: 'Dashboard',   shortcut: 'G then H', keys: ['g', 'h'], icon: <Home className="w-3.5 h-3.5" />,     path: '/' },
-  { label: 'Players',     shortcut: 'G then P', keys: ['g', 'p'], icon: <Users className="w-3.5 h-3.5" />,    path: '/players' },
-  { label: 'Analytics',   shortcut: 'G then A', keys: ['g', 'a'], icon: <BarChart3 className="w-3.5 h-3.5" />, path: '/analytics' },
-  { label: 'Tournaments', shortcut: 'G then T', keys: ['g', 't'], icon: <Calendar className="w-3.5 h-3.5" />, path: '/tournaments' },
-  { label: 'Admins',      shortcut: 'G then M', keys: ['g', 'm'], icon: <Shield className="w-3.5 h-3.5" />,   path: '/admins' },
-  { label: 'Settings',    shortcut: 'G then S', keys: ['g', 's'], icon: <Settings className="w-3.5 h-3.5" />, path: '/settings' },
-];
-
-// Route → breadcrumb label map
-const ROUTE_LABELS: Record<string, string> = {
-  '':            'Dashboard',
-  'players':     'Players',
-  'analytics':   'Analytics',
-  'tournaments': 'Tournaments',
-  'admins':      'Admins',
-  'settings':    'Settings',
-  'profile':     'Profile',
-  'attendance':  'Attendance',
-  'work-logs':   'Work Logs',
-  'reviews':     'Reviews',
-};
+} as const;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
