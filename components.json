@@ -8,13 +8,65 @@
     "css": "src/index.css",
     "baseColor": "slate",
     "cssVariables": true,
-    "prefix": ""
+    "prefix": "",
+    "darkMode": "class",
+    "theme": {
+      "extend": {
+        "colors": {
+          "primary": "#6366f1",
+          "secondary": "#ec4899",
+          "accent": "#22c55e",
+          "muted": "#64748b"
+        },
+        "borderRadius": {
+          "lg": "12px",
+          "xl": "16px"
+        },
+        "spacing": {
+          "18": "4.5rem",
+          "22": "5.5rem"
+        },
+        "fontFamily": {
+          "sans": [
+            "Inter",
+            "sans-serif"
+          ],
+          "mono": [
+            "Fira Code",
+            "monospace"
+          ]
+        }
+      }
+    }
   },
   "aliases": {
     "components": "@/components",
     "utils": "@/lib/utils",
     "ui": "@/components/ui",
     "lib": "@/lib",
-    "hooks": "@/hooks"
+    "hooks": "@/hooks",
+    "services": "@/services",
+    "constants": "@/constants",
+    "types": "@/types",
+    "assets": "@/assets"
+  },
+  "project": {
+    "name": "Employee Management System",
+    "version": "1.0.0",
+    "author": "Vivek",
+    "description": "A smart admin dashboard for managing employees, attendance, and analytics."
+  },
+  "features": {
+    "authentication": true,
+    "darkMode": true,
+    "dashboard": true,
+    "analytics": true,
+    "apiIntegration": true
+  },
+  "settings": {
+    "strictMode": true,
+    "eslint": true,
+    "prettier": true,
+    "autoImport": true
   }
 }
